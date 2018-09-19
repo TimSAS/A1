@@ -17,11 +17,11 @@ void displayVector(const vector<vector<string>> * ourData);
 //working with maps:
 void populateFrequencyMap(const vector<vector<string>> * ourData, map<string, int> * supportMap);
 void displayMap(const map<string, int> * ourMap);
+map<string, int> thresholdTheMap(const map<string, int> * ourMap, const float threshold, const int caseCount);
 
 int main()
 {
-	//filter variable(s):
-	const float supportThreshold = 0.15;
+
 
 	//opening our file
 	ifstream ourFile;
@@ -33,10 +33,16 @@ int main()
 	populateVector(&ourFile, &crimeData);
 	//displayVector(&crimeData);
 
-	//figuring out the support for items
+	//figuring out the support & removing not "popular" items
 	map<string, int> frequencyMap;
 	populateFrequencyMap(&crimeData, &frequencyMap);
-	displayMap(&frequencyMap);
+	//displayMap(&frequencyMap);
+	//filter variable(s):
+	const float supportThreshold = 0.10f;
+	const int caseCount = crimeData.size();
+	//removing infrequent items:
+	map<string, int> reducedMap = thresholdTheMap(&frequencyMap, supportThreshold, caseCount);
+	displayMap(&reducedMap);
 
 
 	//figuring out frequent itemsets
@@ -138,4 +144,18 @@ void displayMap(const map<string, int> * ourMap)
 	{
 		cout << "ourMap[" << p.first << "] = " << p.second << endl;
 	}
+}
+map<string, int> thresholdTheMap(const map<string, int> * ourMap, const float threshold, const int caseCount)
+{
+	map<string, int> tempMap;
+	for (const auto &p : (*ourMap))
+	{
+		//if support for item is higher then threshold - add it to new map
+		if (float(p.second) / float(caseCount) > threshold)
+		{
+			tempMap[p.first] = p.second;
+			//cout << (float)p.second / (float)caseCount << endl;
+		}
+	}
+	return tempMap;
 }
