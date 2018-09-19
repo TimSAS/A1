@@ -7,18 +7,18 @@
 using namespace std;
 
 //working with files:
-void openFile(string fileName, ifstream * ourFile);
-void closeFile(ifstream * ourFile);
+void openFile(string fileName, ifstream & ourFile);
+void closeFile(ifstream & ourFile);
 
 //working with vector
-void populateVector(ifstream * ourFile, vector<vector<string>> * ourData);
-void displayVector(const vector<vector<string>> * ourData);
+void populateVector(ifstream & ourFile, vector<vector<string>> & ourData);
+void displayVector(const vector<vector<string>> & ourData);
 
 //working with maps:
-void populateFrequencyMap(const vector<vector<string>> * ourData, map<string, int> * supportMap);
-void displayMap(const map<string, int> * ourMap);
-map<string, int> thresholdTheMap(const map<string, int> * ourMap, const float threshold, const int caseCount);
-void makePairs(vector<vector<string>> * frqPairs, const map<string, int> * frqMap);
+void populateFrequencyMap(const vector<vector<string>> & ourData, map<string, int> & supportMap);
+void displayMap(const map<string, int> & ourMap);
+map<string, int> thresholdTheMap(const map<string, int> & ourMap, const float threshold, const int caseCount);
+void makePairs(vector<vector<string>> & frqPairs, const map<string, int> & frqMap);
 void populateFrequentPairs(const vector<vector<string>> & pairs, map<vector<string>, int> & frqPairs, const vector<vector<string>> & dataSet);
 map<string, int> supportTesting(const map<vector<string>, int> & ourMap, const float threshold, const int caseCount);
 
@@ -28,28 +28,29 @@ int main()
 
 	//opening our file
 	ifstream ourFile;
-	string fileName = "chicagocrime_2_items.csv";
-	openFile(fileName, &ourFile);
+	string fileName = "../data/chicagocrime_2_items.csv";
+	openFile(fileName, ourFile);
 
 	//getting the data into a 2-dimentional vector:
 	vector< vector<string> > crimeData;
-	populateVector(&ourFile, &crimeData);
+	populateVector(ourFile, crimeData);
 	//displayVector(&crimeData);
 
 	//figuring out the support & removing not "popular" items
 	map<string, int> frequencyMap;
-	populateFrequencyMap(&crimeData, &frequencyMap);
+	populateFrequencyMap(crimeData, frequencyMap);
 	//displayMap(&frequencyMap);
 	//filter variable(s):
 	const float supportThreshold = 0.05f;
 	const int caseCount = crimeData.size();
 	//removing infrequent items:
-	map<string, int> reducedMap = thresholdTheMap(&frequencyMap, supportThreshold, caseCount);
-	displayMap(&reducedMap);
+	map<string, int> reducedMap = thresholdTheMap(frequencyMap, supportThreshold, caseCount);
+	cout << "Frequent items, based on support of 5%: " << endl;
+	displayMap(reducedMap);
 
 	//figuring out frequent itemsets
 	vector<vector<string>> pairs;
-	makePairs(&pairs, &reducedMap);
+	makePairs(pairs, reducedMap);
 	//displayVector(&pairs);
 	//counting the occurrences of each pair in all of the cases
 	map< vector<string>, int> frequentPairs;
@@ -60,37 +61,38 @@ int main()
 	//finally run it through support testing
 	map<string, int> res = supportTesting(frequentPairs, supportThreshold, caseCount);
 	//display the frequencies
+	cout << endl << endl << "Most frequent pairs, based on support of 5%:" << endl;
 	for (const auto &p : res) { cout << p.first << " show up " << p.second << " times " << endl; }
 
+	//close file
+	closeFile(ourFile);
+
 	std::cin.get();
-	return 0;
 }
 
-void openFile(string fileName, ifstream * ourFile)
+void openFile(string fileName, ifstream & ourFile)
 {
-	ourFile->open(fileName);
-	if (ourFile->is_open())
+	ourFile.open(fileName);
+	if (ourFile.is_open())
 	{
-		cout << fileName << " is successfully opened!" << endl;
+		cout << fileName << " is successfully opened!" << endl << endl << endl;
 	}
 	else
 	{
-		cout << "Unable to open file!" << endl;
+		cout << "Unable to open file!" << endl << endl << endl;
 	}
-	return;
 }
-void closeFile(ifstream * ourFile)
+void closeFile(ifstream & ourFile)
 {
-	ourFile->close();
-	return;
+	ourFile.close();
 }
 
-void populateVector(ifstream * ourFile, vector<vector<string>> * ourData)
+void populateVector(ifstream & ourFile, vector<vector<string>> & ourData)
 {
-	if (ourFile->is_open())
+	if (ourFile.is_open())
 	{
 		string row;
-		while (getline(*ourFile, row))
+		while (getline(ourFile, row))
 		{
 			vector<string> rowItems;
 			string tempStr;
@@ -113,57 +115,54 @@ void populateVector(ifstream * ourFile, vector<vector<string>> * ourData)
 
 			}
 			rowItems.push_back(tempStr);
-			ourData->push_back(rowItems);
+			ourData.push_back(rowItems);
 			//cout << rowItems[0] << " <> " << rowItems[1] << endl;
 			//cout << row << endl;
 		}
 	}
-	return;
 }
-void displayVector(const vector<vector<string>> * ourData)
+void displayVector(const vector<vector<string>> & ourData)
 {
-	for (int y = 0; y < (*ourData).size(); y++)
+	for (int y = 0; y < ourData.size(); y++)
 	{
-		for (int x = 0; x < (*ourData)[y].size(); x++)
+		for (int x = 0; x < ourData[y].size(); x++)
 		{
-			cout << (*ourData)[y][x] << "    ";
+			cout << ourData[y][x] << "    ";
 		}
 		cout << endl;
 	}
-	return;
 }
 
-void populateFrequencyMap(const vector<vector<string>> * ourData, map<string, int> * frqMap)
+void populateFrequencyMap(const vector<vector<string>> & ourData, map<string, int> & frqMap)
 {
-	for (int y = 0; y < (*ourData).size(); y++)
+	for (int y = 0; y < ourData.size(); y++)
 	{
-		for (int x = 0; x < (*ourData)[y].size(); x++)
+		for (int x = 0; x < ourData[y].size(); x++)
 		{
 			//if the item already in our map:
-			if (frqMap->count((*ourData)[y][x]) > 0)
+			if (frqMap.count(ourData[y][x]) > 0)
 			{
-				(*frqMap)[(*ourData)[y][x]]++;
+				frqMap[ourData[y][x]]++;
 			}
 			//the items wasn't added to our map yet:
 			else
 			{
-				(*frqMap)[(*ourData)[y][x]] = 1;
+				frqMap[ourData[y][x]] = 1;
 			}
 		}
 	}
-	return;
 }
-void displayMap(const map<string, int> * ourMap)
+void displayMap(const map<string, int> & ourMap)
 {
-	for (const auto &p : (*ourMap))
+	for (const auto &p : ourMap)
 	{
 		cout << "ourMap[" << p.first << "] = " << p.second << endl;
 	}
 }
-map<string, int> thresholdTheMap(const map<string, int> * ourMap, const float threshold, const int caseCount)
+map<string, int> thresholdTheMap(const map<string, int> & ourMap, const float threshold, const int caseCount)
 {
 	map<string, int> tempMap;
-	for (const auto &p : (*ourMap))
+	for (const auto &p : ourMap)
 	{
 		//if support for item is higher then threshold - add it to new map
 		if (float(p.second) / float(caseCount) > threshold)
@@ -175,10 +174,10 @@ map<string, int> thresholdTheMap(const map<string, int> * ourMap, const float th
 	return tempMap;
 }
 
-void makePairs(vector<vector<string>> * frqPairs, const map<string, int> * frqMap)
+void makePairs(vector<vector<string>> & frqPairs, const map<string, int> & frqMap)
 {
 	vector<string> tempVect;
-	for (const auto &p : (*frqMap))
+	for (const auto &p : frqMap)
 	{
 		tempVect.push_back(p.first);
 	}
@@ -189,7 +188,7 @@ void makePairs(vector<vector<string>> * frqPairs, const map<string, int> * frqMa
 			vector<string> row;
 			row.push_back(tempVect[y]);
 			row.push_back(tempVect[x]);
-			(*frqPairs).push_back(row);
+			frqPairs.push_back(row);
 		}
 	}
 }
