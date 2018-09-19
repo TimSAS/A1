@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <map>
 
 using namespace std;
 
@@ -11,10 +12,17 @@ void closeFile(ifstream * ourFile);
 
 //working with vector
 void populateVector(ifstream * ourFile, vector<vector<string>> * ourData);
-void displayVector(vector<vector<string>> * ourData);
+void displayVector(const vector<vector<string>> * ourData);
+
+//working with maps:
+void populateFrequencyMap(const vector<vector<string>> * ourData, map<string, int> * supportMap);
+void displayMap(const map<string, int> * ourMap);
 
 int main()
 {
+	//filter variable(s):
+	const float supportThreshold = 0.15;
+
 	//opening our file
 	ifstream ourFile;
 	string fileName = "chicagocrime_2_items.csv";
@@ -23,9 +31,13 @@ int main()
 	//getting the data into a 2-dimentional vector:
 	vector< vector<string> > crimeData;
 	populateVector(&ourFile, &crimeData);
-	displayVector(&crimeData);
+	//displayVector(&crimeData);
 
 	//figuring out the support for items
+	map<string, int> frequencyMap;
+	populateFrequencyMap(&crimeData, &frequencyMap);
+	displayMap(&frequencyMap);
+
 
 	//figuring out frequent itemsets
 
@@ -85,8 +97,9 @@ void populateVector(ifstream * ourFile, vector<vector<string>> * ourData)
 			//cout << row << endl;
 		}
 	}
+	return;
 }
-void displayVector(vector<vector<string>> * ourData)
+void displayVector(const vector<vector<string>> * ourData)
 {
 	for (int y = 0; y < (*ourData).size(); y++)
 	{
@@ -95,5 +108,34 @@ void displayVector(vector<vector<string>> * ourData)
 			cout << (*ourData)[y][x] << "    ";
 		}
 		cout << endl;
+	}
+	return;
+}
+
+void populateFrequencyMap(const vector<vector<string>> * ourData, map<string, int> * frqMap)
+{
+	for (int y = 0; y < (*ourData).size(); y++)
+	{
+		for (int x = 0; x < (*ourData)[y].size(); x++)
+		{
+			//if the item already in our map:
+			if (frqMap->count((*ourData)[y][x]) > 0)
+			{
+				(*frqMap)[(*ourData)[y][x]]++;
+			}
+			//the items wasn't added to our map yet:
+			else
+			{
+				(*frqMap)[(*ourData)[y][x]] = 1;
+			}
+		}
+	}
+	return;
+}
+void displayMap(const map<string, int> * ourMap)
+{
+	for (const auto &p : (*ourMap))
+	{
+		cout << "ourMap[" << p.first << "] = " << p.second << endl;
 	}
 }
