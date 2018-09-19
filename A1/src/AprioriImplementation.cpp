@@ -20,6 +20,7 @@ void displayMap(const map<string, int> * ourMap);
 map<string, int> thresholdTheMap(const map<string, int> * ourMap, const float threshold, const int caseCount);
 void makePairs(vector<vector<string>> * frqPairs, const map<string, int> * frqMap);
 void populateFrequentPairs(const vector<vector<string>> & pairs, map<vector<string>, int> & frqPairs, const vector<vector<string>> & dataSet);
+map<string, int> supportTesting(const map<vector<string>, int> & ourMap, const float threshold, const int caseCount);
 
 int main()
 {
@@ -40,11 +41,11 @@ int main()
 	populateFrequencyMap(&crimeData, &frequencyMap);
 	//displayMap(&frequencyMap);
 	//filter variable(s):
-	const float supportThreshold = 0.10f;
+	const float supportThreshold = 0.05f;
 	const int caseCount = crimeData.size();
 	//removing infrequent items:
 	map<string, int> reducedMap = thresholdTheMap(&frequencyMap, supportThreshold, caseCount);
-	//displayMap(&reducedMap);
+	displayMap(&reducedMap);
 
 	//figuring out frequent itemsets
 	vector<vector<string>> pairs;
@@ -54,7 +55,12 @@ int main()
 	map< vector<string>, int> frequentPairs;
 	populateFrequentPairs(pairs, frequentPairs, crimeData);
 	//display the frequencies
-	for (const auto &p : frequentPairs) { cout << p.first[0] << " && " << p.first[1] << " show up " << p.second << " times " << endl; }
+	//for (const auto &p : frequentPairs){ cout << p.first[0] << " && " << p.first[1] << " show up " << p.second << " times " << endl; }
+
+	//finally run it through support testing
+	map<string, int> res = supportTesting(frequentPairs, supportThreshold, caseCount);
+	//display the frequencies
+	for (const auto &p : res) { cout << p.first << " show up " << p.second << " times " << endl; }
 
 	std::cin.get();
 	return 0;
@@ -208,4 +214,20 @@ void populateFrequentPairs(const vector<vector<string>> & pairs, map<vector<stri
 		if (frqPairs.count(vec1)) { frqPairs[vec1]++; }
 		else if (frqPairs.count(vec2)) { frqPairs[vec2]++; }
 	}
+}
+map<string, int> supportTesting(const map<vector<string>, int> & ourMap, const float threshold, const int caseCount)
+{
+	map<string, int> tempMap;
+	for (const auto &p : ourMap)
+	{
+		//if support for item is higher then threshold - add it to new map
+		if (float(p.second) / float(caseCount) > threshold)
+		{
+			string str = "";
+			str += p.first[0]; str += " && "; str += p.first[1];
+			tempMap[str] = p.second;
+			//cout << (float)p.second / (float)caseCount << endl;
+		}
+	}
+	return tempMap;
 }
