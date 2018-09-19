@@ -18,7 +18,8 @@ void displayVector(const vector<vector<string>> * ourData);
 void populateFrequencyMap(const vector<vector<string>> * ourData, map<string, int> * supportMap);
 void displayMap(const map<string, int> * ourMap);
 map<string, int> thresholdTheMap(const map<string, int> * ourMap, const float threshold, const int caseCount);
-void populateFrequentPairs(vector<vector<string>> * frqPairs, const map<string, int> * frqMap);
+void makePairs(vector<vector<string>> * frqPairs, const map<string, int> * frqMap);
+void populateFrequentPairs(const vector<vector<string>> & pairs, map<vector<string>, int> & frqPairs, const vector<vector<string>> & dataSet);
 
 int main()
 {
@@ -43,13 +44,17 @@ int main()
 	const int caseCount = crimeData.size();
 	//removing infrequent items:
 	map<string, int> reducedMap = thresholdTheMap(&frequencyMap, supportThreshold, caseCount);
-	displayMap(&reducedMap);
+	//displayMap(&reducedMap);
 
 	//figuring out frequent itemsets
-	vector<vector<string>> frequentPairs;
-	populateFrequentPairs(&frequentPairs, &reducedMap);
-	displayVector(&frequentPairs);
-
+	vector<vector<string>> pairs;
+	makePairs(&pairs, &reducedMap);
+	//displayVector(&pairs);
+	//counting the occurrences of each pair in all of the cases
+	map< vector<string>, int> frequentPairs;
+	populateFrequentPairs(pairs, frequentPairs, crimeData);
+	//display the frequencies
+	for (const auto &p : frequentPairs) { cout << p.first[0] << " && " << p.first[1] << " show up " << p.second << " times " << endl; }
 
 	std::cin.get();
 	return 0;
@@ -164,7 +169,7 @@ map<string, int> thresholdTheMap(const map<string, int> * ourMap, const float th
 	return tempMap;
 }
 
-void populateFrequentPairs(vector<vector<string>> * frqPairs, const map<string, int> * frqMap)
+void makePairs(vector<vector<string>> * frqPairs, const map<string, int> * frqMap)
 {
 	vector<string> tempVect;
 	for (const auto &p : (*frqMap))
@@ -180,5 +185,27 @@ void populateFrequentPairs(vector<vector<string>> * frqPairs, const map<string, 
 			row.push_back(tempVect[x]);
 			(*frqPairs).push_back(row);
 		}
+	}
+}
+void populateFrequentPairs(const vector<vector<string>> & pairs, map<vector<string>, int> & frqPairs, const vector<vector<string>> & dataSet)
+{
+	//create a map with all pairs as keys
+	for (int i = 0; i < pairs.size(); i++)
+	{
+		vector<string> tempVec;
+		tempVec.push_back(pairs[i][0]);
+		tempVec.push_back(pairs[i][1]);
+		frqPairs[tempVec] = 0;
+	}
+
+	//find how many times do those pairs appear in the data set
+	for (int y = 0; y < dataSet.size(); y++)
+	{
+		int x = 0;
+		vector<string> vec1; vec1.push_back(dataSet[y][x]); vec1.push_back(dataSet[y][x + 1]);
+		vector<string> vec2; vec2.push_back(dataSet[y][x + 1]); vec2.push_back(dataSet[y][x]);
+		//check if it's in our map
+		if (frqPairs.count(vec1)) { frqPairs[vec1]++; }
+		else if (frqPairs.count(vec2)) { frqPairs[vec2]++; }
 	}
 }
