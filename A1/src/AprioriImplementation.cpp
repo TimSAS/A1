@@ -18,6 +18,7 @@ void displayVector(const vector<vector<string>> * ourData);
 void populateFrequencyMap(const vector<vector<string>> * ourData, map<string, int> * supportMap);
 void displayMap(const map<string, int> * ourMap);
 map<string, int> thresholdTheMap(const map<string, int> * ourMap, const float threshold, const int caseCount);
+void populateFrequentPairs(vector<vector<string>> * frqPairs, const map<string, int> * frqMap);
 
 int main()
 {
@@ -44,8 +45,11 @@ int main()
 	map<string, int> reducedMap = thresholdTheMap(&frequencyMap, supportThreshold, caseCount);
 	displayMap(&reducedMap);
 
-
 	//figuring out frequent itemsets
+	vector<vector<string>> frequentPairs;
+	populateFrequentPairs(&frequentPairs, &reducedMap);
+	displayVector(&frequentPairs);
+
 
 	std::cin.get();
 	return 0;
@@ -158,4 +162,23 @@ map<string, int> thresholdTheMap(const map<string, int> * ourMap, const float th
 		}
 	}
 	return tempMap;
+}
+
+void populateFrequentPairs(vector<vector<string>> * frqPairs, const map<string, int> * frqMap)
+{
+	vector<string> tempVect;
+	for (const auto &p : (*frqMap))
+	{
+		tempVect.push_back(p.first);
+	}
+	for (int y = 0; y < tempVect.size(); y++)
+	{
+		for (int x = y + 1; x < tempVect.size(); x++)
+		{
+			vector<string> row;
+			row.push_back(tempVect[y]);
+			row.push_back(tempVect[x]);
+			(*frqPairs).push_back(row);
+		}
+	}
 }
